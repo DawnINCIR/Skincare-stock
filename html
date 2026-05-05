@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Private Skincare Shelf</title>
+    <style>
+        :root {
+            --primary: #f8f1f1;
+            --accent: #adc2a9;
+            --text: #4a4a4a;
+            --white: #ffffff;
+            --edit: #54a0ff;
+            --save: #1dd1a1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container { max-width: 850px; width: 100%; }
+        header { text-align: center; margin-bottom: 30px; }
+
+        .card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        input, select, textarea {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        textarea { grid-column: span 2; resize: vertical; }
+
+        .image-upload-wrapper {
+            grid-column: span 2;
+            background: #fdfdfd;
+            border: 2px dashed #adc2a9;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-add { background-color: var(--accent); color: white; width: 100%; font-size: 16px; margin-top: 10px;}
+
+        .controls-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.5);
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .control-item { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+
+        .product-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
+            gap: 20px; 
+        }
+
+        .product-item { 
+            background: white; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #eee;
+        }
+
+        .product-info { padding: 15px; flex-grow: 1; }
+        .product-info h3 { margin: 0; font-size: 1.1em; color: #2d2d2d; }
+        .tag { font-size: 11px; background: #eee; padding: 2px 8px; border-radius: 10px; display: inline-block; margin: 5px 0;}
+        
+        .button-group { display: flex; gap: 8px; padding: 0 15px 15px 15px; }
+        .delete-btn { background: #ff7675; color: white; flex: 1; }
+        .edit-btn { background: var(--edit); color: white; flex: 1; }
+        .save-btn { background: var(--save); color: white; flex: 1; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Skincare Inventory</h1>
+        <p>Private Visual Shelf</p>
+    </header>
+
+    <div class="card">
+        <div class="input-group">
+            <div class="image-upload-wrapper">
+                <label style="display:block; margin-bottom:5px; font-size:0.8em; font-weight:bold;">Product Photo:</label>
+                <input type="file" id="prodImage" accept="image/*">
+            </div>
+            <input type="text" id="prodName" placeholder="Product Name">
+            <input type="text" id="prodBrand" placeholder="Brand">
+            <select id="prodType">
+                <option value="Mask">Mask</option>
+                <option value="Cleanser">Cleanser</option>
+                <option value="Serum">Serum</option>
+                <option value="Toner">Toner</option>
+                <option value="SPF">Sunscreen</option>
+                <option value="Cream">Cream / Moisturizer</option>
+                <option value="Exfoliant">Exfoliant</option>
+                <option value="Acid">Acid / Ance </option>
+                <option value="Handcream">Handcream</option>
+                <option value="Bodycare">Bodycare</option>
+                <option value="Lip">Lip</option>
+            </select>
+            <input type="date" id="prodExpiry">
+            <textarea id="prodNotes" placeholder="Notes..."></textarea>
+        </div>
+        <button class="btn-add" onclick="addProduct()">Add to Shelf</button>
+    </div>
+
+    <div class="controls-row">
+        <div class="control-item">
+            <label>Filter:</label>
+            <select id="typeFilter" onchange="renderProducts()">
+                <option value="All">All Products</option>
+                <option value="Mask">Mask</option>
+                <option value="Cleanser">Cleanser</option>
+                <option value="Serum">Serum</option>
+                <option value="Toner">Toner</option>
+                <option value="SPF">Sunscreen</option>
+                <option value="Cream">Cream / Moisturizer</option>
+                <option value="Exfoliant">Exfoliant</option>
+                <option value="Acid">Acid / Ance</option>
+                <option value="Handcream">Handcream</option>
+                <option value="Bodycare">Bodycare</option>
+                <option value="Lip">Lip</option>
+            </select>
+        </div>
+        <div class="control-item">
+            <label>Sort By:</label>
+            <select id="sortOrder" onchange="renderProducts()">
+                <option value="newest">Recently Added</option>
+                <option value="name">Name (A-Z)</option>
+                <option value="brand">Brand (A-Z)</option>
+                <option value="expiry">Expiry (Soonest)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="product-grid" id="productGrid"></div>
+</div>
+
+<script>
+    let products = JSON.parse(localStorage.getItem('mySkincare')) || [];
+    let editingIndex = null;
+    const categories = ["Mask", "Cleanser", "Serum", "Toner", "SPF", "Cream", "Exfoliant", "Acid / Ance", "Handcream", "Bodycare", "Lip"];
+
+    // Helper to convert image to string
+    function toBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    async function addProduct() {
+        const name = document.getElementById('prodName').value;
+        const brand = document.getElementById('prodBrand').value;
+        const type = document.getElementById('prodType').value;
+        const expiry = document.getElementById('prodExpiry').value;
+        const notes = document.getElementById('prodNotes').value;
+        const imageFile = document.getElementById('prodImage').files[0];
+
+        if (!name) return alert("Please enter a name");
+
+        let imageBase64 = "";
+        if (imageFile) {
+            imageBase64 = await toBase64(imageFile);
+        }
+
+        products.push({ name, brand, type, expiry, notes, image: imageBase64 });
+        updateStorage();
+        
+        // Reset form
+        document.getElementById('prodName').value = '';
+        document.getElementById('prodBrand').value = '';
+        document.getElementById('prodNotes').value = '';
+        document.getElementById('prodImage').value = '';
+        renderProducts();
+    }
+
+    function renderProducts() {
+        const grid = document.getElementById('productGrid');
+        const filterValue = document.getElementById('typeFilter').value;
+        const sortValue = document.getElementById('sortOrder').value;
+        grid.innerHTML = '';
+        
+        let displayList = products.map((p, i) => ({ ...p, originalIndex: i }));
+
+        if (filterValue !== "All") displayList = displayList.filter(p => p.type === filterValue);
+
+        displayList.sort((a, b) => {
+            if (sortValue === 'name') return a.name.localeCompare(b.name);
+            if (sortValue === 'brand') return a.brand.localeCompare(b.brand);
+            if (sortValue === 'expiry') return new Date(a.expiry || '9999') - new Date(b.expiry || '9999');
+            return 0;
+        });
+
+        displayList.forEach((p) => {
+            const index = p.originalIndex;
+            const div = document.createElement('div');
+            div.className = 'product-item';
+            
+            if (editingIndex === index) {
+                div.style.padding = "15px";
+                div.innerHTML = `
+                    <label style="font-size:12px">Update Photo:</label>
+                    <input type="file" id="editImg-${index}" accept="image/*"> </br>
+                    <input type="text" id="editName-${index}" value="${p.name}"> </br>
+                    <input type="text" id="editBrand-${index}" value="${p.brand}"> </br>
+                    <select id="editType-${index}">
+                        ${categories.map(cat => `<option value="${cat}" ${p.type === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                    </select> </br>
+                    <input type="date" id="editExpiry-${index}" value="${p.expiry}"> </br>
+                    <textarea id="editNotes-${index}">${p.notes}</textarea> 
+                    <div class="button-group" style="padding:10px 0 0 0">
+                        <button class="save-btn" onclick="saveEdit(${index})">Save</button>
+                        <button onclick="cancelEdit()">Back</button>
+                    </div>
+                `;
+            } else {
+                const imgSource = p.image || 'https://via.placeholder.com/300x180?text=No+Image';
+                div.innerHTML = `
+                    <img src="${imgSource}" class="product-img" alt="${p.name}">
+                    <div class="product-info">
+                        <h3>${p.name}</h3>
+                        <p style="margin:5px 0"><strong>${p.brand}</strong></p>
+                        <span class="tag">${p.type}</span>
+                        <p style="font-size: 0.85em; color: #666; margin: 10px 0;">${p.notes}</p>
+                        <p style="font-size: 0.75em; border-top: 1px solid #eee; padding-top:5px">Expires: ${p.expiry || 'N/A'}</p>
+                    </div>
+                    <div class="button-group">
+                        <button class="edit-btn" onclick="startEdit(${index})">Edit</button>
+                        <button class="delete-btn" onclick="deleteProduct(${index})">Remove</button>
+                    </div>
+                `;
+            }
+            grid.appendChild(div);
+        });
+    }
+
+    async function saveEdit(index) {
+        const fileInput = document.getElementById(`editImg-${index}`);
+        let imageBase64 = products[index].image; // keep old if no new one
+
+        if (fileInput.files[0]) {
+            imageBase64 = await toBase64(fileInput.files[0]);
+        }
+
+        products[index] = {
+            name: document.getElementById(`editName-${index}`).value,
+            brand: document.getElementById(`editBrand-${index}`).value,
+            type: document.getElementById(`editType-${index}`).value,
+            expiry: document.getElementById(`editExpiry-${index}`).value,
+            notes: document.getElementById(`editNotes-${index}`).value,
+            image: imageBase64
+        };
+        editingIndex = null;
+        updateStorage();
+        renderProducts();
+    }
+
+    function startEdit(index) { editingIndex = index; renderProducts(); }
+    function cancelEdit() { editingIndex = null; renderProducts(); }
+    function deleteProduct(index) {
+        if (confirm("Remove this item?")) {
+            products.splice(index, 1);
+            updateStorage();
+            renderProducts();
+        }
+    }
+    function updateStorage() { localStorage.setItem('mySkincare', JSON.stringify(products)); }
+
+    renderProducts();
+</script>
+
+</body>
+</html>
